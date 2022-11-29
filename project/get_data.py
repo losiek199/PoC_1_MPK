@@ -3,6 +3,7 @@ import requests
 import os
 import zipfile
 import app
+import pandas
 
 """
 module responsible for downloading data
@@ -20,7 +21,7 @@ def download_file(file_url, save_path):
             for chunk in req.iter_content():
                 file.write(chunk)
     #unpacking zipped file
-        unzip_file(save_path)
+        return unzip_file(save_path)
 
     except PermissionError:
         app.assign_dir_privelages(save_path)
@@ -37,7 +38,10 @@ def unzip_file(file_path):
         with zipfile.ZipFile(file_path, 'r') as zip_ref:
             zip_ref.extractall(write_path)
         os.remove(file_path)
+        return write_path
     except PermissionError as e:
         print('Permission error:', e)
         app.assign_dir_privelages(write_path)
         unzip_file(file_path)
+
+

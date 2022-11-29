@@ -1,4 +1,6 @@
 import sqlite3
+import sqlalchemy
+import pandas
 
 conn = sqlite3.connect('mpk.db')
 c = conn.cursor()
@@ -45,16 +47,9 @@ c.execute("""CREATE TABLE IF NOT EXISTS control_stops (
 c.execute("""CREATE TABLE IF NOT EXISTS feed_info (
             feed_publisher_name TEXT,
             feed_publisher_url TEXT,
-            feed_lang,feed_start_date INTEGER,
-            feed_lang,feed_end_date INTEGER
-            )""")
-
-#feed_info table
-c.execute("""CREATE TABLE IF NOT EXISTS feed_info (
-            feed_publisher_name TEXT,
-            feed_publisher_url TEXT,
-            feed_lang,feed_start_date INTEGER,
-            feed_lang,feed_end_date INTEGER
+            feed_lang TEXT,
+            feed_start_date INTEGER,
+            feed_end_date INTEGER
             )""")
 
 
@@ -133,3 +128,31 @@ c.execute("""CREATE TABLE IF NOT EXISTS vehicle_types (
             vehicle_type_symbol TEXT
             )""")
 
+conn.commit()
+
+def insert_data_row(table, data:tuple):
+    pass
+
+def truncate_load_table(table_name, source_path):
+    #truncate table
+    c.execute("DELETE FROM :table", {'table': table_name})
+    conn.commit()
+    print('Truncated table: ', table_name)
+    #load table
+    df = pandas.read_csv(source_path, header=1)
+    df.to_sql(table_name, conn)
+    print('Rows inserted: ',select_count_data(table_name))
+
+def select_count_data(table):
+    c.execute("SELECT COUNT(*) FROM ?", (table,))
+    return c.fetchall()
+
+
+def select_data(table, rows=1000):
+    return c.execute("SELECT * FROM ?", (table,))
+
+def delete_data(table, column_name, filter_expression):
+    pass
+
+def update_data(table, column_name, new_column_value, filter_expression):
+    pass
