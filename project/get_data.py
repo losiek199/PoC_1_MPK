@@ -22,7 +22,6 @@ def download_file(file_url, save_path):
                 file.write(chunk)
     #unpacking zipped file
         return unzip_file(save_path)
-
     except PermissionError:
         app.assign_dir_privelages(save_path)
         download_file(file_url, save_path)
