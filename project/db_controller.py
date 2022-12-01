@@ -19,7 +19,7 @@ logs = sqlalchemy.Table('logs', meta,
                           )
 
 #agency table
-agency = sqlalchemy.Table('agency', meta, 
+agency = sqlalchemy.Table('agency', meta,
             sqlalchemy.Column('city_id', sqlalchemy.Integer),
             sqlalchemy.Column('agency_id', sqlalchemy.Integer),
             sqlalchemy.Column('agency_name', sqlalchemy.String),
@@ -162,12 +162,14 @@ vehicle_types = sqlalchemy.Table('vehicle_types', meta,
 #commiting creation of tables only if tables are not existend within DB
 meta.create_all(eng, checkfirst=True)
 
+
 def insert_data_row(table_name: str, data: tuple):
     """insert single data row into specified table"""
     table = sqlalchemy.Table(table_name, meta)
     insert = sqlalchemy.insert(table, data)
     query = conn.execute(insert)
     return query.rowcount
+
 
 def truncate_load_table(table_name: str, source_path: str, city_name:str ='Wrocław'):
     """truncate table and load data based on source file with structure matching table structure"""
@@ -202,9 +204,20 @@ def select_from_table(table_name: str, columns_list:tuple = None):
         q = sqlalchemy.select(target_table)
     return conn.execute(q).fetchall()
 
+
+def get_routes_for_city(city_name: str):
+    table = meta.tables['routes']
+    city_id = get_city_id(city_name)
+    q = sqlalchemy.select(table).where(routes.c.city_id == city_id)
+    return parse_data_to_json(conn.execute(q).fetchall(), table.c)
+
 def get_city_id(filter_value: str):
     q = sqlalchemy.select(cities.c.city_id).where(cities.c.city_name == filter_value)
     return conn.execute(q).fetchone()[0]
+
+def select_city_routes(filter_value: str):
+    q = sqlalchemy.select(cities.c.city_id).where(cities.c.city_name == filter_value)
+    return conn.execute(q).fetchall()[0]
 
 def select_data_as_json(table_name):
     target_table = sqlalchemy.Table(table_name, meta)
@@ -213,20 +226,6 @@ def select_data_as_json(table_name):
     df = pandas.DataFrame.from_records(data=data, columns=target_table.columns)
     return df.to_json(orient='index')
 
-
 def parse_data_to_json(data_collection, column_list):
-    target_table = sqlalchemy.Table(table_name, meta)
-    df = pandas.DataFrame.from_records(data=data_collection, columns=column_list)
+    df = pandas.DataFrame.from_records(data=data_collection, columns=column_list, )
     return df.to_json(orient='index')
-
-
-def get_routes_in_city(city_name):
-    pass
-
-
-def delete_data(table_name, column_name, filter_expression):
-    pass
-
-
-def update_data(table_name, column_name, new_column_value, filter_expression):
-    pass

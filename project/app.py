@@ -33,9 +33,9 @@ def main():
     # #populate db with data
     # for file in os.listdir(dir_path):
     #     db_controller.truncate_load_table(file.split('.')[0], os.path.join(dir_path, file))
-    print(db_controller.select_data_as_json('cities'))
-    print(db_controller.parse_data_to_json(db_controller.select_from_table('cities'), 'cities'))
-
+    # print(db_controller.select_data_as_json('cities'))
+    # print(db_controller.parse_data_to_json(db_controller.select_from_table('cities'), 'cities'))
+    print(db_controller.get_routes_for_city('Wrocław'))
 
 if __name__ == '__main__':
     download_path = os.path.join(os.getcwd(), TEMP_SAVE_PATH)
