@@ -163,21 +163,27 @@ vehicle_types = sqlalchemy.Table('vehicle_types', meta,
 meta.create_all(eng, checkfirst=True)
 
 def insert_data_row(table_name: str, data: tuple):
+    """insert single data row into specified table"""
     table = sqlalchemy.Table(table_name, meta)
     insert = sqlalchemy.insert(table, data)
     query = conn.execute(insert)
     return query.rowcount
 
-
-def truncate_load_table(table_name, source_path):
+def truncate_load_table(table_name: str, source_path: str, city_name:str ='Wrocław'):
+    """truncate table and load data based on source file with structure matching table structure"""
     #truncate table
     target_table = sqlalchemy.Table(table_name, meta)
     query = conn.execute(sqlalchemy.delete(target_table))
     print('Truncated table: {}, deleted: {} rows'.format(table_name, query.rowcount))
     #load data table
     df = pandas.read_csv(source_path)
+    #inserting provided city_name to easier match data
+    city_id = get_city_id(city_name)
+    df.insert(0, 'city_id', city_id)
+    #actual insert of data to DB
     df.to_sql(table_name, con=eng, if_exists='append', index=False)
     print('Rows inserted:', select_count_data(target_table))
+
 
 def select_count_data(table_name):
     target_table = sqlalchemy.Table(table_name, meta)
@@ -185,10 +191,20 @@ def select_count_data(table_name):
     query = conn.execute(cnt)
     return query.fetchone()[0]
 
-def select_data(table_name):
+
+def select_from_table(table_name: str, columns_list:tuple = None):
     target_table = sqlalchemy.Table(table_name, meta)
-    select = sqlalchemy.select(target_table)
-    return conn.execute(select).fetchall()
+    table_columns = meta.tables[table_name].c
+    if columns_list is not None:
+        chosen_columns = [element for element in table_columns if str(element.name) in columns_list]
+        q = sqlalchemy.select(chosen_columns)
+    else:
+        q = sqlalchemy.select(target_table)
+    return conn.execute(q).fetchall()
+
+def get_city_id(filter_value: str):
+    q = sqlalchemy.select(cities.c.city_id).where(cities.c.city_name == filter_value)
+    return conn.execute(q).fetchone()[0]
 
 def select_data_as_json(table_name):
     target_table = sqlalchemy.Table(table_name, meta)
@@ -197,14 +213,20 @@ def select_data_as_json(table_name):
     df = pandas.DataFrame.from_records(data=data, columns=target_table.columns)
     return df.to_json(orient='index')
 
+
+def parse_data_to_json(data_collection, column_list):
+    target_table = sqlalchemy.Table(table_name, meta)
+    df = pandas.DataFrame.from_records(data=data_collection, columns=column_list)
+    return df.to_json(orient='index')
+
+
 def get_routes_in_city(city_name):
     pass
 
-def parse_data_to_json():
-    pass
 
 def delete_data(table_name, column_name, filter_expression):
     pass
+
 
 def update_data(table_name, column_name, new_column_value, filter_expression):
     pass

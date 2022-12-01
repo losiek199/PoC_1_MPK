@@ -27,14 +27,14 @@ def main():
         dir_path = get_data.download_file(TEMP_URL_PLACEHOLDER, file_destination)
     except Exception as e:
         raise(e)
-
-    #populate db with data
-    for file in os.listdir(dir_path):
-        db_controller.truncate_load_table(file.split('.')[0], os.path.join(dir_path, file))
     #creation of city
-    if 'Wrocław' not in [city for id, city in db_controller.select_data('cities')]:
-        db_controller.insert_data_row('cities', (1, 'Wrocław'))
+    # if 'Wrocław' not in [city for id, city in db_controller.select_from_table('cities')]:
+    #     db_controller.insert_data_row('cities', (1, 'Wrocław'))
+    # #populate db with data
+    # for file in os.listdir(dir_path):
+    #     db_controller.truncate_load_table(file.split('.')[0], os.path.join(dir_path, file))
     print(db_controller.select_data_as_json('cities'))
+    print(db_controller.parse_data_to_json(db_controller.select_from_table('cities'), 'cities'))
 
 
 if __name__ == '__main__':
