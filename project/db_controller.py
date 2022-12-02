@@ -224,8 +224,8 @@ def select_data_as_json(table_name):
     select = sqlalchemy.select(target_table)
     data = conn.execute(select).fetchall()
     df = pandas.DataFrame.from_records(data=data, columns=target_table.columns)
-    return df.to_json(orient='index')
+    return df.to_json(orient='index', indent=2)
 
 def parse_data_to_json(data_collection, column_list):
-    df = pandas.DataFrame.from_records(data=data_collection, columns=column_list, )
-    return df.to_json(orient='index')
+    df = pandas.DataFrame.from_records(data=data_collection, columns=column_list)
+    return df.to_json(orient='index', indent=2)
