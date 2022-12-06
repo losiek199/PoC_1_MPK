@@ -24,23 +24,20 @@ def assign_dir_privelages(path, mode=0o777):
             print('Permission granted:', file)
 
 def main():
+    conn = db_controller.initialize_connection()
     try:
         dir_path = get_data.download_file(TEMP_URL_PLACEHOLDER, file_destination)
     except Exception as e:
         raise(e)
-    #creation of city
-    # if 'Wrocław' not in [city for id, city in db_controller.select_from_table('cities')]:
-    #     db_controller.insert_data_row('cities', (1, 'Wrocław'))
-    # #populate db with data
+    #populate db with data
     # for file in os.listdir(dir_path):
-    #     db_controller.truncate_load_table(file.split('.')[0], os.path.join(dir_path, file))
-    # print(db_controller.select_data_as_json('cities'))
-    # print(db_controller.get_routes_for_city('Wrocław'))
+    #     db_controller.truncate_load_table(conn, file.split('.')[0], os.path.join(dir_path, file))
 
 if __name__ == '__main__':
-    api_handler.run_server()
+    #initializing db connection
     download_path = os.path.join(os.getcwd(), TEMP_SAVE_PATH)
     if not os.path.exists(download_path):
         create_dir(download_path)
-
-    main()
+    # main()
+    #starting flask
+    api_handler.run_server()

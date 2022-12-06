@@ -5,6 +5,23 @@
     <title>Welcome!</title>
 </head>
 <body>
-
+    <h1>Please select enpoint</h1>
+    <ol>
+        <li>
+            <button>
+                <a href="{{url_for('welcome')}}">Home</a>
+            </button>
+        </li>
+        <li>
+            <button>
+                <a href="{{url_for('cities')}}">Available cities</a>
+            </button>
+        </li>
+        <li>
+            <button>
+                <a href="{{url_for('routes_main')}}">Get routes</a>
+            </button>
+        </li>
+    </ol>
 </body>
 </html>
