@@ -25,19 +25,25 @@ def assign_dir_privelages(path, mode=0o777):
 
 def main():
     conn = db_controller.initialize_connection()
-    try:
-        dir_path = get_data.download_file(TEMP_URL_PLACEHOLDER, file_destination)
-    except Exception as e:
-        raise(e)
-    #populate db with data
+    # try:
+    #     dir_path = get_data.download_file(TEMP_URL_PLACEHOLDER, file_destination)
+    # except Exception as e:
+    #     raise(e)
+    # populate db with data
+    print(db_controller.meta.tables)
+    if not db_controller.meta.tables:
+        print('creating db')
+        db_controller.create_db()
     # for file in os.listdir(dir_path):
     #     db_controller.truncate_load_table(conn, file.split('.')[0], os.path.join(dir_path, file))
+
+
 
 if __name__ == '__main__':
     #initializing db connection
     download_path = os.path.join(os.getcwd(), TEMP_SAVE_PATH)
     if not os.path.exists(download_path):
         create_dir(download_path)
-    # main()
+    main()
     #starting flask
     api_handler.run_server()

@@ -5,22 +5,33 @@
     <title>Routes</title>
     <script>
         function get_city(){
-        document.getElementById('next').href = document.getElementById('city').value
+        city_value = document.getElementById('city').value
+        button = document.getElementById('next_button')
+        if(city_value==='none'){
+            button.disabled = true
+            }
+        else{
+            button.disabled = false
+            document.getElementById('next').href = document.getElementById('city').value
+            }
         }
     </script>
 </head>
 <body>
     <h1>Choose from available cities and generate json file</h1>
         <select id="city" onchange="get_city()">
+            <option value="none">Choose city</option>
           {%for city in cities%}
             <option value="{{url_for('route', city_name=city.city_name)}}">{{city.city_name}}</option>
           {%endfor%}
         </select>
     <br/>
     <br>
-    <button>
-        <a id="next" href="{{url_for('route', city_name='Wrocław')}}" >Get routes for chosen city</a>
-    </button>
+    <a id="next" href="{{url_for('route', city_name='')}}" >
+        <button id="next_button" type="button" disabled="True">
+            Get routes for chosen city
+        </button>
+    </a>
     </br>
     <br>
     <button>
