@@ -163,8 +163,7 @@ def create_db():
 
     #validation of city existance
     if 'Wrocław' not in [city for id, city in select_from_table(connection, 'cities')]:
-        # insert_data_row(connection, 'cities', ('Wrocław',))
-        sqlalchemy.insert(cities.c.city_name).values('Wrocław')
+        insert_data_row(connection, 'cities', (None, 'Wrocław'))
 
 
 def initialize_connection():
@@ -261,5 +260,3 @@ def parse_data_to_csv(data_collection, column_list):
 def parse_data_to_json(data_collection, column_list):
     df = pandas.DataFrame.from_records(data=data_collection, columns=column_list)
     return df.to_json(orient='index', indent=2)
-
-
