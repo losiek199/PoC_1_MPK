@@ -2,9 +2,35 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Trips</title>
+    <script>
+        function get_city(){
+        city_value = document.getElementById('city').value
+        button = document.getElementById('next_button')
+        if(city_value==='none'){
+            button.disabled = true
+            }
+        else{
+            button.disabled = false
+            document.getElementById('next').href = document.getElementById('city').value
+            }
+        }
+    </script>
 </head>
 <body>
   <h1>Get file with trips for chosen city</h1>
+    <p>
+        <select id="city" onchange="get_city()">
+            <option value="none">Choose city</option>
+            {%for city in cities%}
+                <option value="{{url_for('trips_city_file', city_name=city.city_name)}}">{{city.city_name}}</option>
+            {%endfor%}
+        </select>
+    </p>
+    <a id="next" href="{{url_for('trips_city_file', city_name='')}}" >
+        <button id="next_button" type="button" disabled="True">
+            Get trips for chosen city
+        </button>
+    </a>
 </body>
 </html>

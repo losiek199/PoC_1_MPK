@@ -36,7 +36,6 @@ def main():
         db_controller.truncate_load_table(conn, file.split('.')[0], os.path.join(dir_path, file))
 
 
-
 if __name__ == '__main__':
     #initializing db connection
     download_path = os.path.join(os.getcwd(), TEMP_SAVE_PATH)
