@@ -81,4 +81,3 @@ def trips_city_denormalized(city_name):
     except Exception as e:
         return Response(str(e), status=404, mimetype='apllication/json')
 
-

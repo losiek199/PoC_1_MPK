@@ -1,9 +1,7 @@
-from io import BytesIO
 import requests
 import os
 import zipfile
 import app
-import pandas
 
 """
 module responsible for downloading data

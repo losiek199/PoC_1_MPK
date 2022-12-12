@@ -1,5 +1,6 @@
 import sqlalchemy
 import pandas
+from sqlalchemy.exc import SQLAlchemyError
 
 #creating db connection and getting db metadata
 eng = sqlalchemy.create_engine('sqlite:///mpk.db', echo=False)
@@ -163,12 +164,16 @@ def create_db():
         insert_data_row(connection, 'cities', (None, 'Wrocław'))
 
 
-def initialize_connection():
+def initialize_connection(connection_string: str = 'sqlite:///mpk.db'):
     """creating db connection and getting db metadata"""
-    eng = sqlalchemy.create_engine('sqlite:///mpk.db', echo=False)
-    conn = eng.connect()
-    meta.reflect(bind=eng)
-    return conn
+    try:
+        eng = sqlalchemy.create_engine(connection_string, echo=False)
+        conn = eng.connect()
+        meta.reflect(bind=eng)
+        return conn
+    except SQLAlchemyError as e:
+        print(f"Error while connecting to db")
+        raise e
 
 
 def insert_data_row(conn, table_name: str, data: tuple):
