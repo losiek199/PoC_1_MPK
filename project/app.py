@@ -30,8 +30,6 @@ def main():
     except Exception as e:
         raise(e)
     # populate db with data
-    if not db_controller.meta.tables:
-        db_controller.create_db()
     for file in os.listdir(dir_path):
         db_controller.truncate_load_table(conn, file.split('.')[0], os.path.join(dir_path, file))
 
@@ -41,6 +39,7 @@ if __name__ == '__main__':
     download_path = os.path.join(os.getcwd(), TEMP_SAVE_PATH)
     if not os.path.exists(download_path):
         create_dir(download_path)
+    db_controller.db_engine_inspection()
     main()
     #starting flask
     api_handler.run_server()

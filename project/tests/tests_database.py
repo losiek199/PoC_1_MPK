@@ -1,10 +1,13 @@
 import pytest
+import project.tests.Confest as conf
 from collections import Counter
-from project import db_controller
+
+
+db = conf.db_client
 
 @pytest.fixture(autouse=True)
 def db_table_list():
-    return db_controller.meta.tables
+    return db.meta.tables
 
 @pytest.fixture(autouse=True)
 def mandatory_tables():
@@ -12,18 +15,15 @@ def mandatory_tables():
 
 def test_db_connection_error():
     with pytest.raises(Exception) as e:
-        db_controller.initialize_connection('qlite:///bad_host.db')
+        db.initialize_connection('qlite:///bad_host.db')
 
 def test_db_tables_present():
-    assert len(db_controller.meta.tables) > 0
+    assert len(db.meta.tables) > 0
 
 def test_db_tables():
-    assert len(db_controller.meta.tables) > 0
+    assert len(db_table_list()) > 0
     assert [key for key, cnt in Counter(db_table_list())] == 1
+    assert len(mandatory_tables()) == len([tab for tab in mandatory_tables() if tab in db_table_list])
 
-def test_db_tables():
-    assert len(db_controller.meta.tables) > 0
-    assert len(mandatory_tables) == len([tab for tab in mandatory_tables() if tab in db_table_list])
-
-def test_city_id():
-    assert db_controller.get_city_id('Wrocław') == 1
+def test_select_city_id():
+    assert db.get_city_id('Wrocław') == 1

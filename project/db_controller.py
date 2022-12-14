@@ -6,7 +6,9 @@ from sqlalchemy.exc import SQLAlchemyError
 eng = sqlalchemy.create_engine('sqlite:///mpk.db', echo=False)
 connection = eng.connect()
 meta = sqlalchemy.MetaData(bind=connection)
+ins = sqlalchemy.inspect(eng)
 
+#tables schemas:
 cities = sqlalchemy.Table('cities', meta,
                           sqlalchemy.Column('city_id', sqlalchemy.Integer, primary_key=True),
                           sqlalchemy.Column('city_name', sqlalchemy.String)
@@ -154,15 +156,12 @@ vehicle_types = sqlalchemy.Table('vehicle_types', meta,
                                  sqlalchemy.Column('city_id', sqlalchemy.Integer)
                                  )
 
-#Setting up database schema - using sqlAlchemy to protect against sqlInjection
-def create_db():
-    #commiting creation of tables only if tables are not existend within DB
-    meta.create_all(eng, checkfirst=True)
 
-    #validation of city existance
-    if 'Wrocław' not in [city for id, city in select_from_table(connection, 'cities')]:
-        insert_data_row(connection, 'cities', (None, 'Wrocław'))
-
+def db_engine_inspection():
+    """checks if tables exists in reflected db tables"""
+    if [tab_name for tab_name in meta.tables if tab_name not in ins.get_table_names()]:
+        print('Creating tables')
+        meta.create_all(eng, checkfirst=True)
 
 def initialize_connection(connection_string: str = 'sqlite:///mpk.db'):
     """creating db connection and getting db metadata"""
@@ -188,16 +187,22 @@ def truncate_load_table(conn, table_name: str, source_path: str, city_name: str 
     """truncate table and load data based on source file with structure matching table structure"""
     #truncate table
     target_table = sqlalchemy.Table(table_name, meta)
-    if table_name not in meta.tables:
-        print(table_name, ' not in schema')
-        pass
+
+    #validation of city existance
+    if city_name not in [city['city_name'] for city in select_from_table(connection, 'cities')]:
+        print(f'inserting city {city_name}')
+        insert_data_row(connection, 'cities', (None, city_name))
+
     # truncate table
     conn.execute(sqlalchemy.delete(target_table))
+
     # load data into pandas dataframe
     df = pandas.read_csv(source_path)
+
     # inserting provided city_name to easier match data later on
     city_id = get_city_id(conn, city_name)
     df.insert(0, 'city_id', city_id)
+
     #actual insert of data to DB
     df.to_sql(table_name, con=eng, if_exists='append', index=False)
 
@@ -217,7 +222,9 @@ def select_from_table(conn, table_name: str, columns_list: tuple = None):
         q = sqlalchemy.select(chosen_columns)
     else:
         q = sqlalchemy.select(target_table)
-    return conn.execute(q).fetchall()
+    result = conn.execute(q).fetchall()
+    ret = ([dict(val) for val in result])
+    return ret
 
 
 def select_routes_for_city(conn, city_name: str = 'Wrocław'):
@@ -265,10 +272,6 @@ def get_city_id(conn, filter_value: str = 'Wrocław'):
         raise sqlalchemy.exc.NoResultFound(f'No result for: \"{filter_value}\"')
     else:
         return ret_value[0]
-
-
-def parse_data_to_csv(data_collection, column_list):
-    pass
 
 def parse_data_to_json(data_collection, column_list):
     df = pandas.DataFrame.from_records(data=data_collection, columns=column_list)
