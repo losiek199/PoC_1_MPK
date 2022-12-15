@@ -14,3 +14,4 @@ Werkzeug==2.2.2
 pytest~=7.2.0
 SQLAlchemy~=1.4.44
 pandas~=1.5.2
+flask_sqlalchemy~=3.0.2

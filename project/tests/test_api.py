@@ -1,6 +1,6 @@
 import pytest
 import requests
-from Confest import cities_mocked_row, routes_mocked_row
+from Confest import cities_mocked_row, routes_mocked_row, trips_mocked_row
 import json
 
 import project.api_handler as ah
@@ -16,6 +16,7 @@ client = ah.app.test_client()
 def source_file_response():
     return requests.get('https://www.wroclaw.pl/open-data/dataset/rozkladjazdytransportupublicznegoplik_data')
 
+
 """Test methods"""
 def test_get_flask_defined_urls():
     resp = client.get('/')
@@ -30,10 +31,12 @@ def test_get_flask_cities_response(mocker, cities_mocked_row):
     assert expected == json.loads(resp.data)
 
 
-def test_post_flask_cities(cities_mocked_row):
-    resp = client.post('/api/cities', data={"city_id": 1, "city_name": "Wrocław"})
-    print(resp)
+def test_post_flask_cities(mocker):
+    mocker.patch('project.db_controller.insert_data_row', return_value=1)
+    json_data = {"city_id": 1, "city_name": "Wrocław"}
+    resp = client.post('/api/cities', json=json_data)
     assert resp.status_code == 200
+    assert json.loads(resp.data) == json_data
 
 
 def test_get_flask_routes_response(mocker, routes_mocked_row):
@@ -42,8 +45,13 @@ def test_get_flask_routes_response(mocker, routes_mocked_row):
     expected = routes_mocked_row
     resp = client.get('/api/routes/Wrocław')
     assert expected == json.loads(resp.data)
+    assert resp.status_code == 200
 
 
-def test_post_flask_routes():
-    client.post('/api/routes/Wrocław')
-    assert pytest.raises(Exception)
+def test_get_flask_trips_response(mocker, trips_mocked_row ):
+    mocker.patch('project.db_controller.select_city_trips',
+                 return_value=trips_mocked_row)
+    expected = trips_mocked_row
+    resp = client.get('/api/trips/Wrocław')
+    assert resp.status_code == 200
+    assert expected == json.loads(resp.data)

@@ -1,159 +1,163 @@
-import sqlalchemy
+import sqlalchemy as db
+from sqlalchemy.orm import declarative_base
 import pandas
 from sqlalchemy.exc import SQLAlchemyError
+from flask_sqlalchemy import SQLAlchemy as fsdb
 
 #creating db connection and getting db metadata
-eng = sqlalchemy.create_engine('sqlite:///mpk.db', echo=False)
+eng = db.create_engine('sqlite:///mpk.db', echo=False)
 connection = eng.connect()
-meta = sqlalchemy.MetaData(bind=connection)
-ins = sqlalchemy.inspect(eng)
+meta = db.MetaData(bind=connection)
+ins = db.inspect(eng)
+Base = declarative_base()
 
 #tables schemas:
-cities = sqlalchemy.Table('cities', meta,
-                          sqlalchemy.Column('city_id', sqlalchemy.Integer, primary_key=True),
-                          sqlalchemy.Column('city_name', sqlalchemy.String)
+cities = db.Table('cities', meta,
+                          db.Column('city_id', db.Integer, primary_key=True),
+                          db.Column('city_name', db.String)
                           )
 
-logs = sqlalchemy.Table('logs', meta,
-                        sqlalchemy.Column('row_id', sqlalchemy.Integer, primary_key=True),
-                        sqlalchemy.Column('log_dt', sqlalchemy.String),
-                        sqlalchemy.Column('action', sqlalchemy.String)
+
+logs = db.Table('logs', meta,
+                        db.Column('row_id', db.Integer, primary_key=True),
+                        db.Column('log_dt', db.String),
+                        db.Column('action', db.String)
                         )
 
 # agency table
-agency = sqlalchemy.Table('agency', meta,
-                          sqlalchemy.Column('agency_id', sqlalchemy.Integer),
-                          sqlalchemy.Column('agency_name', sqlalchemy.String),
-                          sqlalchemy.Column('agency_url', sqlalchemy.String),
-                          sqlalchemy.Column('agency_timezone', sqlalchemy.String),
-                          sqlalchemy.Column('agency_phone', sqlalchemy.String),
-                          sqlalchemy.Column('agency_lang', sqlalchemy.String),
-                          sqlalchemy.Column('city_id', sqlalchemy.Integer)
+agency = db.Table('agency', meta,
+                          db.Column('agency_id', db.Integer),
+                          db.Column('agency_name', db.String),
+                          db.Column('agency_url', db.String),
+                          db.Column('agency_timezone', db.String),
+                          db.Column('agency_phone', db.String),
+                          db.Column('agency_lang', db.String),
+                          db.Column('city_id', db.Integer)
                           )
 
 # calendar table
-calendar = sqlalchemy.Table('calendar', meta,
-                            sqlalchemy.Column('service_id', sqlalchemy.Integer),
-                            sqlalchemy.Column('monday', sqlalchemy.Integer),
-                            sqlalchemy.Column('tuesday', sqlalchemy.Integer),
-                            sqlalchemy.Column('wednesday', sqlalchemy.Integer),
-                            sqlalchemy.Column('thursday', sqlalchemy.Integer),
-                            sqlalchemy.Column('friday', sqlalchemy.Integer),
-                            sqlalchemy.Column('saturday', sqlalchemy.Integer),
-                            sqlalchemy.Column('sunday', sqlalchemy.Integer),
-                            sqlalchemy.Column('start_date', sqlalchemy.Integer),
-                            sqlalchemy.Column('end_date', sqlalchemy.Integer),
-                            sqlalchemy.Column('city_id', sqlalchemy.Integer)
+calendar = db.Table('calendar', meta,
+                            db.Column('service_id', db.Integer),
+                            db.Column('monday', db.Integer),
+                            db.Column('tuesday', db.Integer),
+                            db.Column('wednesday', db.Integer),
+                            db.Column('thursday', db.Integer),
+                            db.Column('friday', db.Integer),
+                            db.Column('saturday', db.Integer),
+                            db.Column('sunday', db.Integer),
+                            db.Column('start_date', db.Integer),
+                            db.Column('end_date', db.Integer),
+                            db.Column('city_id', db.Integer)
                             )
 
 # calendar_dates table
-calendar_dates = sqlalchemy.Table('calendar_dates', meta,
-                                  sqlalchemy.Column('service_id', sqlalchemy.Integer),
-                                  sqlalchemy.Column('date', sqlalchemy.Integer),
-                                  sqlalchemy.Column('exception_type', sqlalchemy.Integer),
-                                  sqlalchemy.Column('city_id', sqlalchemy.Integer)
+calendar_dates = db.Table('calendar_dates', meta,
+                                  db.Column('service_id', db.Integer),
+                                  db.Column('date', db.Integer),
+                                  db.Column('exception_type', db.Integer),
+                                  db.Column('city_id', db.Integer)
                                   )
 
 # control_stops table
-control_stops = sqlalchemy.Table('control_stops', meta,
-                                 sqlalchemy.Column('variant_id', sqlalchemy.Integer),
-                                 sqlalchemy.Column('stop_id', sqlalchemy.Integer),
-                                 sqlalchemy.Column('city_id', sqlalchemy.Integer)
+control_stops = db.Table('control_stops', meta,
+                                 db.Column('variant_id', db.Integer),
+                                 db.Column('stop_id', db.Integer),
+                                 db.Column('city_id', db.Integer)
                                  )
 
 # feed_info table
-feed_info = sqlalchemy.Table('feed_info', meta,
-                             sqlalchemy.Column('feed_publisher_name', sqlalchemy.String),
-                             sqlalchemy.Column('feed_publisher_url', sqlalchemy.String),
-                             sqlalchemy.Column('feed_lang', sqlalchemy.String),
-                             sqlalchemy.Column('feed_start_date', sqlalchemy.Integer),
-                             sqlalchemy.Column('feed_end_date', sqlalchemy.Integer),
-                             sqlalchemy.Column('city_id', sqlalchemy.Integer)
+feed_info = db.Table('feed_info', meta,
+                             db.Column('feed_publisher_name', db.String),
+                             db.Column('feed_publisher_url', db.String),
+                             db.Column('feed_lang', db.String),
+                             db.Column('feed_start_date', db.Integer),
+                             db.Column('feed_end_date', db.Integer),
+                             db.Column('city_id', db.Integer)
                              )
 
 # route_types table
-route_types = sqlalchemy.Table('route_types', meta,
-                               sqlalchemy.Column('route_type2_id', sqlalchemy.Integer),
-                               sqlalchemy.Column('route_type2_name', sqlalchemy.String),
-                               sqlalchemy.Column('city_id', sqlalchemy.Integer)
+route_types = db.Table('route_types', meta,
+                               db.Column('route_type2_id', db.Integer),
+                               db.Column('route_type2_name', db.String),
+                               db.Column('city_id', db.Integer)
                                )
 
 # routes table
-routes = sqlalchemy.Table('routes', meta,
-                          sqlalchemy.Column('route_id', sqlalchemy.String),
-                          sqlalchemy.Column('agency_id', sqlalchemy.Integer),
-                          sqlalchemy.Column('route_short_name', sqlalchemy.String),
-                          sqlalchemy.Column('route_long_name', sqlalchemy.String),
-                          sqlalchemy.Column('route_desc', sqlalchemy.String),
-                          sqlalchemy.Column('route_type', sqlalchemy.Integer),
-                          sqlalchemy.Column('route_type2_id', sqlalchemy.Integer),
-                          sqlalchemy.Column('valid_from', sqlalchemy.String),
-                          sqlalchemy.Column('valid_until', sqlalchemy.String),
-                          sqlalchemy.Column('city_id', sqlalchemy.Integer)
+routes = db.Table('routes', meta,
+                          db.Column('route_id', db.String),
+                          db.Column('agency_id', db.Integer),
+                          db.Column('route_short_name', db.String),
+                          db.Column('route_long_name', db.String),
+                          db.Column('route_desc', db.String),
+                          db.Column('route_type', db.Integer),
+                          db.Column('route_type2_id', db.Integer),
+                          db.Column('valid_from', db.String),
+                          db.Column('valid_until', db.String),
+                          db.Column('city_id', db.Integer)
                           )
 
 # shapes table
-shapes = sqlalchemy.Table('shapes', meta,
-                          sqlalchemy.Column('shape_id', sqlalchemy.Integer),
-                          sqlalchemy.Column('shape_pt_lat', sqlalchemy.Float),
-                          sqlalchemy.Column('shape_pt_lon', sqlalchemy.Float),
-                          sqlalchemy.Column('shape_pt_sequence', sqlalchemy.Integer),
-                          sqlalchemy.Column('city_id', sqlalchemy.Integer)
+shapes = db.Table('shapes', meta,
+                          db.Column('shape_id', db.Integer),
+                          db.Column('shape_pt_lat', db.Float),
+                          db.Column('shape_pt_lon', db.Float),
+                          db.Column('shape_pt_sequence', db.Integer),
+                          db.Column('city_id', db.Integer)
                           )
 
 # stop_times table
-stop_times = sqlalchemy.Table('stop_times', meta,
-                              sqlalchemy.Column('trip_id', sqlalchemy.String),
-                              sqlalchemy.Column('arrival_time', sqlalchemy.String),
-                              sqlalchemy.Column('departure_time', sqlalchemy.String),
-                              sqlalchemy.Column('stop_id', sqlalchemy.Integer),
-                              sqlalchemy.Column('stop_sequence', sqlalchemy.Integer),
-                              sqlalchemy.Column('pickup_type', sqlalchemy.Integer),
-                              sqlalchemy.Column('drop_off_type', sqlalchemy.Integer),
-                              sqlalchemy.Column('city_id', sqlalchemy.Integer)
+stop_times = db.Table('stop_times', meta,
+                              db.Column('trip_id', db.String),
+                              db.Column('arrival_time', db.String),
+                              db.Column('departure_time', db.String),
+                              db.Column('stop_id', db.Integer),
+                              db.Column('stop_sequence', db.Integer),
+                              db.Column('pickup_type', db.Integer),
+                              db.Column('drop_off_type', db.Integer),
+                              db.Column('city_id', db.Integer)
                               )
 
 # stops table
-stops = sqlalchemy.Table('stops', meta,
-                         sqlalchemy.Column('stop_id', sqlalchemy.String),
-                         sqlalchemy.Column('stop_code', sqlalchemy.Integer),
-                         sqlalchemy.Column('stop_name', sqlalchemy.String),
-                         sqlalchemy.Column('stop_lat', sqlalchemy.Float),
-                         sqlalchemy.Column('stop_lon', sqlalchemy.Float),
-                         sqlalchemy.Column('city_id', sqlalchemy.Integer)
+stops = db.Table('stops', meta,
+                         db.Column('stop_id', db.String),
+                         db.Column('stop_code', db.Integer),
+                         db.Column('stop_name', db.String),
+                         db.Column('stop_lat', db.Float),
+                         db.Column('stop_lon', db.Float),
+                         db.Column('city_id', db.Integer)
                          )
 
 # trips table
-trips = sqlalchemy.Table('trips', meta,
-                         sqlalchemy.Column('route_id', sqlalchemy.Integer),
-                         sqlalchemy.Column('service_id', sqlalchemy.Integer),
-                         sqlalchemy.Column('trip_id', sqlalchemy.String),
-                         sqlalchemy.Column('trip_headsign', sqlalchemy.Float),
-                         sqlalchemy.Column('direction_id', sqlalchemy.Integer),
-                         sqlalchemy.Column('shape_id', sqlalchemy.Integer),
-                         sqlalchemy.Column('brigade_id', sqlalchemy.Integer),
-                         sqlalchemy.Column('vehicle_id', sqlalchemy.Integer),
-                         sqlalchemy.Column('variant_id', sqlalchemy.Integer),
-                         sqlalchemy.Column('city_id', sqlalchemy.Integer)
+trips = db.Table('trips', meta,
+                         db.Column('route_id', db.Integer),
+                         db.Column('service_id', db.Integer),
+                         db.Column('trip_id', db.String),
+                         db.Column('trip_headsign', db.Float),
+                         db.Column('direction_id', db.Integer),
+                         db.Column('shape_id', db.Integer),
+                         db.Column('brigade_id', db.Integer),
+                         db.Column('vehicle_id', db.Integer),
+                         db.Column('variant_id', db.Integer),
+                         db.Column('city_id', db.Integer)
                          )
 
 # variants table
-variants = sqlalchemy.Table('variants', meta,
-                            sqlalchemy.Column('variant_id', sqlalchemy.Integer),
-                            sqlalchemy.Column('is_main', sqlalchemy.Integer),
-                            sqlalchemy.Column('equiv_main_variant_id', sqlalchemy.Integer),
-                            sqlalchemy.Column('join_stop_id', sqlalchemy.Integer),
-                            sqlalchemy.Column('disjoin_stop_id', sqlalchemy.Integer),
-                            sqlalchemy.Column('city_id', sqlalchemy.Integer)
+variants = db.Table('variants', meta,
+                            db.Column('variant_id', db.Integer),
+                            db.Column('is_main', db.Integer),
+                            db.Column('equiv_main_variant_id', db.Integer),
+                            db.Column('join_stop_id', db.Integer),
+                            db.Column('disjoin_stop_id', db.Integer),
+                            db.Column('city_id', db.Integer)
                             )
 
 # vehicle_types table
-vehicle_types = sqlalchemy.Table('vehicle_types', meta,
-                                 sqlalchemy.Column('vehicle_type_id', sqlalchemy.Integer),
-                                 sqlalchemy.Column('vehicle_type_name', sqlalchemy.String),
-                                 sqlalchemy.Column('vehicle_type_description', sqlalchemy.String),
-                                 sqlalchemy.Column('vehicle_type_symbol', sqlalchemy.String),
-                                 sqlalchemy.Column('city_id', sqlalchemy.Integer)
+vehicle_types = db.Table('vehicle_types', meta,
+                                 db.Column('vehicle_type_id', db.Integer),
+                                 db.Column('vehicle_type_name', db.String),
+                                 db.Column('vehicle_type_description', db.String),
+                                 db.Column('vehicle_type_symbol', db.String),
+                                 db.Column('city_id', db.Integer)
                                  )
 
 
@@ -166,19 +170,19 @@ def db_engine_inspection():
 def initialize_connection(connection_string: str = 'sqlite:///mpk.db'):
     """creating db connection and getting db metadata"""
     try:
-        eng = sqlalchemy.create_engine(connection_string, echo=False)
+        eng = db.create_engine(connection_string, echo=False)
         conn = eng.connect()
         meta.reflect(bind=eng)
         return conn
-    except SQLAlchemyError as e:
+    except dbError as e:
         print(f"Error while connecting to db")
         raise e
 
 
 def insert_data_row(conn, table_name: str, data: tuple):
     """insert single data row into specified table"""
-    table = sqlalchemy.Table(table_name, meta)
-    insert = sqlalchemy.insert(table).values(data)
+    table = db.Table(table_name, meta)
+    insert = db.insert(table).values(data)
     query = conn.execute(insert)
     return query.rowcount
 
@@ -186,7 +190,7 @@ def insert_data_row(conn, table_name: str, data: tuple):
 def truncate_load_table(conn, table_name: str, source_path: str, city_name: str ='Wrocław'):
     """truncate table and load data based on source file with structure matching table structure"""
     #truncate table
-    target_table = sqlalchemy.Table(table_name, meta)
+    target_table = db.Table(table_name, meta)
 
     #validation of city existance
     if city_name not in [city['city_name'] for city in select_from_table(connection, 'cities')]:
@@ -194,7 +198,7 @@ def truncate_load_table(conn, table_name: str, source_path: str, city_name: str 
         insert_data_row(connection, 'cities', (None, city_name))
 
     # truncate table
-    conn.execute(sqlalchemy.delete(target_table))
+    conn.execute(db.delete(target_table))
 
     # load data into pandas dataframe
     df = pandas.read_csv(source_path)
@@ -208,20 +212,20 @@ def truncate_load_table(conn, table_name: str, source_path: str, city_name: str 
 
 
 def select_count_data(conn, table_name):
-    target_table = sqlalchemy.Table(table_name, meta)
-    cnt = sqlalchemy.select([sqlalchemy.func.count()]).select_from(target_table)
+    target_table = db.Table(table_name, meta)
+    cnt = db.select([db.func.count()]).select_from(target_table)
     query = conn.execute(cnt)
     return query.fetchone()[0]
 
 
 def select_from_table(conn, table_name: str, columns_list: tuple = None):
-    target_table = sqlalchemy.Table(table_name, meta)
+    target_table = db.Table(table_name, meta)
     table_columns = meta.tables[table_name].c
     if columns_list is not None:
         chosen_columns = [element for element in table_columns if str(element.name) in columns_list]
-        q = sqlalchemy.select(chosen_columns)
+        q = db.select(chosen_columns)
     else:
-        q = sqlalchemy.select(target_table)
+        q = db.select(target_table)
     result = conn.execute(q).fetchall()
     ret = ([dict(val) for val in result])
     return ret
@@ -231,9 +235,9 @@ def select_routes_for_city(conn, city_name: str = 'Wrocław'):
     table = meta.tables['routes']
     try:
         city_id = get_city_id(conn, city_name)
-    except sqlalchemy.exc.NoResultFound as e:
+    except db.exc.NoResultFound as e:
         raise e
-    q = sqlalchemy.select(table).where(meta.tables['routes'].c.city_id == city_id)
+    q = db.select(table).where(meta.tables['routes'].c.city_id == city_id)
     result = conn.execute(q).fetchall()
     cnt = len(result)
     if not result:
@@ -245,7 +249,7 @@ def select_routes_for_city(conn, city_name: str = 'Wrocław'):
 def select_city_trips(conn, filter_value: str = 'Wrocław'):
     try:
         city_id = get_city_id(conn, filter_value)
-    except sqlalchemy.exc.NoResultFound as e:
+    except db.exc.NoResultFound as e:
         raise e
     #building join based on relations
     join_q = trips.join(routes, trips.c.route_id == routes.c.route_id)\
@@ -253,7 +257,7 @@ def select_city_trips(conn, filter_value: str = 'Wrocław'):
         .join(stops, stop_times.c.stop_id == stops.c.stop_id)\
         .join(vehicle_types, trips.c.vehicle_id == vehicle_types.c.vehicle_type_id)
     #buidling select query
-    q = sqlalchemy.select(trips.c.trip_id, trips.c.trip_headsign, routes.c.route_id, stop_times.c.arrival_time, stops.c.stop_id, stops.c.stop_code,stops.c.stop_name,vehicle_types.c.vehicle_type_id )\
+    q = db.select(trips.c.trip_id, trips.c.trip_headsign, routes.c.route_id, stop_times.c.arrival_time, stops.c.stop_id, stops.c.stop_code,stops.c.stop_name,vehicle_types.c.vehicle_type_id )\
         .select_from(join_q)\
         .filter(trips.c.city_id == city_id)\
         .order_by(trips.c.trip_id.asc(), stop_times.c.stop_sequence.asc())
@@ -266,10 +270,10 @@ def select_city_trips(conn, filter_value: str = 'Wrocław'):
 
 def get_city_id(conn, filter_value: str = 'Wrocław'):
     table = meta.tables['cities']
-    q = sqlalchemy.select(table.c.city_id).where(table.c.city_name == filter_value)
+    q = db.select(table.c.city_id).where(table.c.city_name == filter_value)
     ret_value = conn.execute(q).fetchone()
     if ret_value is None:
-        raise sqlalchemy.exc.NoResultFound(f'No result for: \"{filter_value}\"')
+        raise db.exc.NoResultFound(f'No result for: \"{filter_value}\"')
     else:
         return ret_value[0]
 
