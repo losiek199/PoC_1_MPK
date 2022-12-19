@@ -12,7 +12,7 @@ Base = declarative_base(bind=eng)
 Session = sessionmaker(bind=eng)
 
 #importing models after declarative Base object is created to not couse dependency errors
-from project.models import Agency, Calendar_dates, Calendar, Cities, Control_stops, Feed_info, Route_types, Routes, Shapes, Stops, Stop_times, Trips, Variants, Vehicle_types
+from project.models import Agency, Calendar_dates, Calendar, Cities, City_trips, Control_stops, Feed_info, Route_types, Routes, Shapes, Stops, Stop_times, Trips, Variants, Vehicle_types
 
 #medatadata and inspector for created DB
 ins = db.inspect(eng)
@@ -20,7 +20,6 @@ ins = db.inspect(eng)
 #creating DB tables and metadatada schema
 Base.metadata.create_all()
 meta = Base.metadata
-
 
 def db_engine_inspection():
     """checks if tables exists in reflected db tables"""
@@ -127,23 +126,56 @@ def select_from_table(table_name: str, columns_list: tuple = None):
 
 
 def select_routes_for_city(conn, city_name: str = 'Wrocław'):
-    table = meta.tables['routes']
+    session = Session()
+    session.autocommit = True
     try:
-        city_id = get_city_id(conn, city_name)
+        city_id = get_city_id(city_name)
     except db.exc.NoResultFound as e:
         raise e
-    q = db.select(table).where(meta.tables['routes'].c.city_id == city_id)
-    result = conn.execute(q).fetchall()
+    result = session.query(Routes).where(Routes.city_id==city_id).all()
     cnt = len(result)
     if not result:
         return {'count': cnt}
     else:
         return ({'count': cnt}, {'routes':[dict(val) for val in result]})
 
+def load_city_trips():
+    """Function preloads city trips based on prepared query to speed up data handling between db and API"""
+    session = Session()
+    session.autocommit = True
 
-def select_city_trips(conn, filter_value: str = 'Wrocław'):
+    #clean current data
+    del_query = sqlalchemy.delete(City_trips)
+    session.execute(del_query)
+
+    #Loading query
+    sel_query = session.query(Trips) \
+        .join(Routes) \
+        .join(Stop_times) \
+        .join(Stops) \
+        .join(Vehicle_types) \
+        .with_entities(Trips.city_id,
+                       Trips.trip_id,
+                       Trips.trip_headsign,
+                       Routes.route_id,
+                       Stop_times.arrival_time,
+                       Stops.stop_id,
+                       Stops.stop_code,
+                       Stops.stop_name,
+                       Vehicle_types.vehicle_type_id) \
+        .where(Trips.city_id == 1) \
+        .all()
+
+    # for val in sel_query:
+    #     print(val)
+
+    # execute insert statement
+    session.execute('INSERT INTO CITY_TRIPS VALUES(?)', sel_query)
+
+
+def select_city_trips(filter_value: str = 'Wrocław'):
     try:
-        city_id = get_city_id(conn, filter_value)
+        city_id = get_city_id(filter_value)
     except db.exc.NoResultFound as e:
         raise e
 

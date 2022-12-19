@@ -2,6 +2,7 @@ from models.agency import Agency
 from models.calendar import Calendar
 from models.calendar_dates import Calendar_dates
 from models.cities import Cities
+from models.city_trips import City_trips
 from models.control_stops import Control_stops
 from models.feed_info import Feed_info
 from models.routes import Routes
