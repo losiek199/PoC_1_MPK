@@ -1,10 +1,10 @@
-from sqlalchemy import Column,Integer
+from sqlalchemy import Column, Integer, ForeignKey
 from db_controller import Base
 
 class Calendar(Base):
     __tablename__ = 'calendar'
 
-    service_id = Column(Integer)
+    service_id = Column(Integer, ForeignKey('calendar_dates.service_id'), primary_key=True)
     monday = Column(Integer)
     tuesday = Column(Integer)
     wednesday = Column(Integer)
@@ -14,4 +14,4 @@ class Calendar(Base):
     sunday = Column(Integer)
     start_date = Column(Integer)
     end_date = Column(Integer)
-    city_id = Column(Integer)
+    city_id = Column(Integer, ForeignKey('cities.city_id'))

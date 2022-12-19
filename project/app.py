@@ -24,14 +24,14 @@ def assign_dir_privelages(path, mode=0o777):
             print('Permission granted:', file)
 
 def main():
-    conn = db_controller.initialize_connection()
+    # conn = db_controller.initialize_connection()
     try:
         dir_path = get_data.download_file(TEMP_URL_PLACEHOLDER, file_destination)
     except Exception as e:
         raise(e)
     # populate db with data
     for file in os.listdir(dir_path):
-        db_controller.truncate_load_table(conn, file.split('.')[0], os.path.join(dir_path, file))
+        db_controller.truncate_load_table(file.split('.')[0], os.path.join(dir_path, file))
 
 
 if __name__ == '__main__':
@@ -39,7 +39,7 @@ if __name__ == '__main__':
     download_path = os.path.join(os.getcwd(), TEMP_SAVE_PATH)
     if not os.path.exists(download_path):
         create_dir(download_path)
-    db_controller.db_engine_inspection()
+    # db_controller.db_engine_inspection()
     main()
     #starting flask
     api_handler.run_server()

@@ -1,28 +1,11 @@
+import json
 import os.path
 from flask import Flask, render_template, abort, request, jsonify, Response, redirect, send_file
-from flask_restful import Api, Resource
+from flask_restful import Api
 import project.db_controller as db
-from flask_sqlalchemy import SQLAlchemy as fsdb
-
 
 app = Flask(__name__)
 api = Api(app)
-app.config["SQLALCHEMY_DATABASE_URI"] = db.eng.url
-fsdb.init_app(app)
-
-class trip(fsdb.Model):
-    trip_id = fsdb.Column(fsdb.String, primary_key=True)
-    trip_headsign = fsdb.Column(fsdb.String)
-    route_id = fsdb.Column(fsdb.Integer)
-    arrival_time = fsdb.Column(fsdb.String)
-    stop_id = fsdb.Column(fsdb.Integer)
-    stop_code = fsdb.Column(fsdb.String)
-    vehicle_type_id = fsdb.Column(fsdb.Integer)
-
-with app.app_context():
-    fsdb.create_all()
-
-
 
 def run_server():
     app.run(debug=True)
@@ -49,8 +32,7 @@ def route(city_name):
 
 @app.route('/trips', methods=['GET'])
 def trips_city():
-    conn = db.initialize_connection()
-    cities = db.select_from_table(conn, 'cities')
+    cities = db.select_from_table('cities')
     return render_template('trips_city.html', cities=cities)
 
 @app.route('/trips/<city_name>', methods=['GET'])
@@ -69,10 +51,13 @@ def trips_city_file(city_name):
 def api_cities():
     conn = db.initialize_connection()
     if request.method == 'POST':
-        db.insert_data_row(conn, 'cities', (None, request.json['city_name']))
-        return Response(status=200, response=request.data, mimetype='application/json')
+        db_resp = db.insert_city_row(request.json)
+        if db_resp == 0:
+            return Response(status=409, response=(f'{json.loads(request.data)} already exists'))
+        else:
+            return Response(status=200, response=request.data, mimetype='application/json')
     else:
-        data = db.select_from_table(conn, 'cities')
+        data = db.select_from_table('cities')
         rdict = {'cities': [dict(val) for val in data]}
         return jsonify(rdict)
 
