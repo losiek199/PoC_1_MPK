@@ -41,5 +41,5 @@ if __name__ == '__main__':
         create_dir(download_path)
     # db_controller.db_engine_inspection()
     main()
-    #starting flask
+    # starting flask
     api_handler.run_server()

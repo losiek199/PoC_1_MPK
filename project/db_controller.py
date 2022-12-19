@@ -1,3 +1,4 @@
+import sqlalchemy
 from sqlalchemy.exc import SQLAlchemyError
 import pandas
 
@@ -52,45 +53,54 @@ def insert_city_row(data):
         return 1
     else:
         return 0
-\
+
 def get_city_id(filter_value: str = 'Wrocław'):
     try:
         session = Session()
-        # result = session.query(Cities.city_id).where(Cities.city_name == filter_value).one()
         result = session.query(Cities.city_id).where(Cities.city_name == filter_value).one()
-        print(result)
     except db.exc.NoResultFound:
         return -1
     else:
-        return result
+        return result[0]
 
 
 def truncate_load_table(table_name: str, source_path: str, city_name: str ='Wrocław'):
     """truncate table and load data based on source file with structure matching table structure"""
     session = Session()
+    session.autocommit = True
+
+    #search for valid table in metadata
+    table = None
+    #extract table class from model
+    for table_class in Base.__subclasses__():
+        if hasattr(table_class, '__tablename__') and table_class.__tablename__ == table_name:
+            table = table_class
+    if table == None:
+        raise db.exc.NoSuchTableError(table_name)
     #truncate table
-    session.query(text(table_name))
-    # session.query(text(table_name)).delete()
+    query = sqlalchemy.delete(table)
+    session.execute(query)
+
     #validation of city existance
     if city_name not in [city.city_name for city in session.query(Cities)]:
         print(f'inserting city {city_name}')
         insert_city_row({"city_name": city_name})
-    else:
-        print(city_name)
 
-    # load data into pandas dataframe
+    # # load data into pandas dataframe
     df = pandas.read_csv(source_path)
 
-    # getting city_id provided above
+    # # getting city_id to insert it into pandas DF, city ID extract from DB by using city_name
     city_id = get_city_id(city_name)
     if city_id < 0:
         return 'Provided city does not exist in DB'
     else:
         df.insert(0, 'city_id', city_id)
 
-    print('before insert ')
+    #deduplication of data
+    df.drop_duplicates(inplace=True)
     #actual insert of data to DB
     df.to_sql(table_name, con=eng, if_exists='append', index=False)
+
 
 def select_columns(modelClass, columns):
     if len(columns) == 0:

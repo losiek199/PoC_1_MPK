@@ -7,5 +7,5 @@ class Shapes(Base):
     shape_id = Column(Integer, primary_key=True)
     shape_pt_lat = Column(Float)
     shape_pt_lon = Column(Float)
-    shape_pt_sequence = Column(Integer)
+    shape_pt_sequence = Column(Integer, primary_key=True)
     city_id = Column(Integer, ForeignKey('cities.city_id'))
