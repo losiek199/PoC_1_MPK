@@ -48,12 +48,12 @@ def insert_city_row(data):
         new_city = Cities(city_name=data['city_name'])
         session.add(new_city)
         session.commit()
-        print(new_city.city_name, new_city.city_id)
         return 1
     else:
         return 0
 
 def get_city_id(filter_value: str = 'Wrocław'):
+    """returns city_id based on city_name"""
     try:
         session = Session()
         result = session.query(Cities.city_id).where(Cities.city_name == filter_value).one()
@@ -101,48 +101,53 @@ def truncate_load_table(table_name: str, source_path: str, city_name: str ='Wroc
     df.to_sql(table_name, con=eng, if_exists='append', index=False)
 
 
-def select_columns(modelClass, columns):
+def select_columns(model_class, columns):
+    """returns columns available on that model builded on class"""
     if len(columns) == 0:
         return None
     else:
-        columnsMeta = [f'{modelClass.__name__}.{col}' for col in columns]
-        return columnsMeta
+        columns_meta = [f'{model_class.__name__}.{col}' for col in columns]
+        return columns_meta
+
 
 def select_count_data(table_name):
+    """returns count of rows from given table"""
     session = Session()
     cnt = session.query(table_name).count()
     return cnt
 
 
 def select_from_table(table_name: str, columns_list: tuple = None):
+    """queries db to return data from given table, returns tuple of dicts"""
     session = Session()
     if columns_list is not None:
         columns = select_columns(columns_list)
         result = session.query(meta.tables[table_name]).with_entities(columns)
     else:
         result = session.query(meta.tables[table_name])
-    ret = ([dict(val) for val in result])
+    ret = ([val.__dict__ for val in result])
     return ret
 
 
-def select_routes_for_city(conn, city_name: str = 'Wrocław'):
+def select_routes_for_city(city_name: str = 'Wrocław'):
+    """queries DB to extract data about available routes in given city"""
     session = Session()
     session.autocommit = True
     try:
         city_id = get_city_id(city_name)
     except db.exc.NoResultFound as e:
         raise e
-    result = session.query(Routes).where(Routes.city_id==city_id).all()
+    result = session.query(Routes).where(Routes.city_id == city_id).all()
     cnt = len(result)
     if not result:
         return {'count': cnt}
     else:
-        return ({'count': cnt}, {'routes':[dict(val) for val in result]})
+        return ({'count': cnt}, {'routes':[val.__dict__ for val in result]})
+
 
 def load_city_trips():
     """Function preloads city trips based on prepared query to speed up data handling between db and API"""
     session = Session()
-    session.autocommit = True
 
     #clean current data
     del_query = sqlalchemy.delete(City_trips)
@@ -166,46 +171,35 @@ def load_city_trips():
         .where(Trips.city_id == 1) \
         .all()
 
-    # for val in sel_query:
-    #     print(val)
-
-    # execute insert statement
-    session.execute('INSERT INTO CITY_TRIPS VALUES(?)', sel_query)
+    #creating list of objects to laod into City_trips table
+    city_trips = []
+    for obj in sel_query:
+        city_trips.append(City_trips(city_id=obj['city_id'],
+                                     trip_id=obj['trip_id'],
+                                     trip_headsign=obj['trip_headsign'],
+                                     route_id=obj['route_id'],
+                                     arrival_time=obj['arrival_time'],
+                                     stop_id=obj['stop_id'],
+                                     stop_code=obj['stop_code'],
+                                     stop_name=obj['stop_name'],
+                                     vehicle_type_id=obj['vehicle_type_id'])
+                          )
+    session.add_all(city_trips)
+    session.commit()
 
 
 def select_city_trips(filter_value: str = 'Wrocław'):
+    """queries DB to extract data regarding available city trips and returns json"""
+    session = Session()
+    session.autocommit=True
     try:
         city_id = get_city_id(filter_value)
     except db.exc.NoResultFound as e:
         raise e
-
-    session = Session()
-
-    result = session.query(Trips)\
-        .join(Routes)\
-        .join(Stop_times)\
-        .join(Stops)\
-        .join(Vehicle_types)\
-        .filter_by(city_id=city_id)
-    print(result)
-    #building join based on relations
-    # join_q = Trips.join(routes, trips.c.route_id == routes.c.route_id)\
-    #     .join(stop_times, trips.c.trip_id == stop_times.c.trip_id)\
-    #     .join(stops, stop_times.c.stop_id == stops.c.stop_id)\
-    #     .join(vehicle_types, trips.c.vehicle_id == vehicle_types.c.vehicle_type_id)
     #buidling select query
-    # q = db.select(trips.c.trip_id, trips.c.trip_headsign, routes.c.route_id, stop_times.c.arrival_time, stops.c.stop_id, stops.c.stop_code,stops.c.stop_name,vehicle_types.c.vehicle_type_id )\
-    #     .select_from(join_q)\
-    #     .filter(trips.c.city_id == city_id)\
-    #     .order_by(trips.c.trip_id.asc(), stop_times.c.stop_sequence.asc())
-    # result = conn.execute(q).fetchall()
+    result = session.query(City_trips).where(City_trips.city_id == city_id).all()
     cnt = len(result)
     if not result:
         return {'count': cnt}
     else:
-        return ({'count': cnt}, {'routes':[dict(val) for val in result]})
-
-
-def parse_data_to_json(data_collection, column_list):
-    df = pandas.DataFrame.from_records(data=data_collection, columns=column_list)
-    return df.to_json(orient='index', indent=2)
+        return {'count': cnt}, {'routes': [val.__dict__ for val in result]}

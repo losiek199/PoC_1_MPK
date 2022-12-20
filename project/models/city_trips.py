@@ -8,8 +8,10 @@ class City_trips(Base):
     trip_id = Column(String(128), primary_key=True)
     trip_headsign = Column(String)
     route_id = Column(String(128), primary_key=True)
-    arrival_time = Column(String(128))
+    arrival_time = Column(String(128), primary_key=True)
     stop_id = Column(String(128), primary_key=True)
     stop_code = Column(Integer)
     stop_name = Column(String(128))
     vehicle_type_id = Column(Integer, primary_key=True)
+
+
