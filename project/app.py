@@ -1,4 +1,3 @@
-import get_data
 import db_controller
 import api_handler
 import os
@@ -11,28 +10,20 @@ file_destination = os.path.join(os.getcwd(), TEMP_SAVE_PATH, TEMP_DIR_NAME)
 
 
 def main():
-    # load data
-    # try:
-    #     dir_path = get_data.download_file(TEMP_URL_PLACEHOLDER, file_destination)
-    # except Exception as e:
-    #     raise(e)
-    # populate db with data
-    get_data.load_data_from_url(TEMP_URL_PLACEHOLDER, file_destination)
-    # for file in os.listdir(dir_path):
-    #     #truncate - load table with specified file prefix
-    #     db_controller.truncate_load_table(file.split('.')[0], os.path.join(dir_path, file))
-    #     # remove file after load
-    #     get_data.delete_file(os.path.join(dir_path, file))
-    db_controller.load_city_trips()
+    # make sure that directory exists and grant needed privelages
+    # download_path = os.path.join(os.getcwd(), TEMP_SAVE_PATH)
+    # if not os.path.exists(download_path):
+    #     get_data.create_dir(download_path)
+    # download zip from url and pass it to db
+    # get_data.load_data_from_url(TEMP_URL_PLACEHOLDER, file_destination)
+    # load city trips table
+    # db_controller.load_city_trips()
     # starting flask
+    x = db_controller.select_from_table('cities')
+    print(x)
     api_handler.run_server()
 
 
 if __name__ == '__main__':
-    #initializing db connection
-    download_path = os.path.join(os.getcwd(), TEMP_SAVE_PATH)
-    if not os.path.exists(download_path):
-        create_dir(download_path)
-    #handling data_load
     main()
 

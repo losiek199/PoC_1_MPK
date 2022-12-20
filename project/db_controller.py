@@ -62,6 +62,24 @@ def get_city_id(filter_value: str = 'Wrocław'):
     else:
         return result[0]
 
+def get_class_from_model(table_name):
+    # search for valid table in metadata
+    table = None
+    # extract table class from model
+    for table_class in Base.__subclasses__():
+        if hasattr(table_class, '__tablename__') and table_class.__tablename__ == table_name:
+            table = table_class
+    if table == None:
+        raise db.exc.NoSuchTableError(table_name)
+    return table
+
+def select_columns(model_class, columns):
+    """returns columns available on that model builded on class"""
+    if len(columns) == 0:
+        return None
+    else:
+        columns_meta = [f'{model_class.__name__}.{col}' for col in columns]
+        return columns_meta
 
 def truncate_load_table(table_name: str, source_path: str, city_name: str ='Wrocław'):
     """truncate table and load data based on source file with structure matching table structure"""
@@ -69,13 +87,7 @@ def truncate_load_table(table_name: str, source_path: str, city_name: str ='Wroc
     session.autocommit = True
 
     #search for valid table in metadata
-    table = None
-    #extract table class from model
-    for table_class in Base.__subclasses__():
-        if hasattr(table_class, '__tablename__') and table_class.__tablename__ == table_name:
-            table = table_class
-    if table == None:
-        raise db.exc.NoSuchTableError(table_name)
+    table = get_class_from_model(table_name)
     #truncate table
     query = sqlalchemy.delete(table)
     session.execute(query)
@@ -101,14 +113,6 @@ def truncate_load_table(table_name: str, source_path: str, city_name: str ='Wroc
     df.to_sql(table_name, con=eng, if_exists='append', index=False)
 
 
-def select_columns(model_class, columns):
-    """returns columns available on that model builded on class"""
-    if len(columns) == 0:
-        return None
-    else:
-        columns_meta = [f'{model_class.__name__}.{col}' for col in columns]
-        return columns_meta
-
 
 def select_count_data(table_name):
     """returns count of rows from given table"""
@@ -120,11 +124,12 @@ def select_count_data(table_name):
 def select_from_table(table_name: str, columns_list: tuple = None):
     """queries db to return data from given table, returns tuple of dicts"""
     session = Session()
+    table = get_class_from_model('routes')
     if columns_list is not None:
-        columns = select_columns(columns_list)
-        result = session.query(meta.tables[table_name]).with_entities(columns)
+        columns = select_columns(table, columns_list)
+        result = session.query(table).with_entities(columns)
     else:
-        result = session.query(meta.tables[table_name])
+        result = session.query(table)
     ret = ([val.__dict__ for val in result])
     return ret
 

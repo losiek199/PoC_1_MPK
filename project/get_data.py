@@ -10,10 +10,12 @@ from mpk wroclaw site, file downloaded from provided endpoint"""
 TEMP = 'unpacked'
 
 def create_dir(path):
+    """creates directory on local system"""
     print('Creating dir:', path)
     os.mkdir(path)
 
 def assign_dir_privelages(path, mode=0o777):
+    """assign needed privelages to directory"""
     for root, dir, files in os.walk(path, topdown=False):
         for dir in [os.path.join(root, d) for d in dir]:
             os.chmod(dir, mode)
@@ -40,7 +42,7 @@ def download_file(file_url, save_path):
         download_file(file_url, save_path)
 
 def unzip_file(file_path):
-    """unpack file into temporary directory and remove source file afterwards"""
+    """unpack file into temporary directory and remove source file afterwards, returns directory where files were unpacked"""
     #unpack destination
     write_path = os.path.join(os.path.join(os.getcwd(), app.TEMP_SAVE_PATH, TEMP))
     #check dir existance and create if needed
@@ -62,10 +64,9 @@ def delete_file(file_path):
 
 def load_data_from_url(url, directory):
     """downloads data from given url and ordres truncate load to DB"""
-    # download file
-    download_file(url, directory)
-
+    # download files
+    unpacked_dir = download_file(url, directory)
     # load data into DB nd delete file afterwards
-    for file in os.listdir(directory):
-        db.truncate_load_table(file.split('.')[0], os.path.join(directory, file))
-        delete_file(os.path.join(directory, file))
+    for file in os.listdir(unpacked_dir):
+        db.truncate_load_table(file.split('.')[0], os.path.join(unpacked_dir, file))
+        delete_file(os.path.join(unpacked_dir, file))

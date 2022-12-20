@@ -1,6 +1,6 @@
 import json
 import os.path
-from flask import Flask, render_template, abort, request, jsonify, Response, redirect, send_file
+from flask import Flask, render_template, abort, request, jsonify, Response, send_file
 from flask_restful import Api
 import project.db_controller as db
 
@@ -16,15 +16,13 @@ def welcome():
 
 @app.route("/routes", methods=['GET'])
 def routes():
-    conn = db.initialize_connection()
-    cities = db.select_from_table(conn, 'cities')
+    cities = db.select_from_table('cities')
     return render_template('routes_main.html', cities=cities)
 
 @app.route("/routes/<city_name>", methods=['GET'])
 def route(city_name):
     try:
-        conn = db.initialize_connection()
-        routes = db.select_routes_for_city(conn, city_name)
+        routes = db.select_routes_for_city(city_name)
         return render_template('routes.html', city_name=city_name, routes=jsonify(routes).data)
     except Exception as e:
         return Response(str(e), status=404, mimetype='application/json')
@@ -38,8 +36,7 @@ def trips_city():
 @app.route('/trips/<city_name>', methods=['GET'])
 def trips_city_file(city_name):
     try:
-        conn = db.initialize_connection()
-        trips = db.select_city_trips(conn, city_name)
+        trips = db.select_city_trips(city_name)
         with open('trips.json', 'w') as file:
             file.write(str(jsonify(trips)))
         return send_file(os.path.abspath(file), as_attachment=True)
@@ -49,7 +46,6 @@ def trips_city_file(city_name):
 """API methods"""
 @app.route("/api/cities", methods=['GET', 'POST'], )
 def api_cities():
-    conn = db.initialize_connection()
     if request.method == 'POST':
         db_resp = db.insert_city_row(request.json)
         if db_resp == 0:
@@ -65,8 +61,7 @@ def api_cities():
 @app.route("/api/routes/<city_name>", methods=['GET'])
 def api_city_routes(city_name):
     try:
-        conn = db.initialize_connection()
-        routes = db.select_routes_for_city(conn, city_name)
+        routes = db.select_routes_for_city(city_name)
         return jsonify(routes)
     except Exception as e:
         return Response(str(e), status=404, mimetype='application/json')
@@ -76,8 +71,7 @@ def trips_city_denormalized(city_name):
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", 200, type=int)
     try:
-        conn = db.initialize_connection()
-        trips = db.select_city_trips(conn, city_name)
+        trips = db.select_city_trips(city_name)
         trips_paginated = trips.query.paginate(page, per_page)
         print(trips_paginated)
         return jsonify(trips_paginated)
