@@ -1,6 +1,7 @@
 import db_controller
 import api_handler
 import os
+import get_data
 
 
 TEMP_URL_PLACEHOLDER = 'https://www.wroclaw.pl/open-data/87b09b32-f076-4475-8ec9-6020ed1f9ac0/OtwartyWroclaw_rozklad_jazdy_GTFS.zip'
@@ -19,8 +20,6 @@ def main():
     # load city trips table
     # db_controller.load_city_trips()
     # starting flask
-    x = db_controller.select_from_table('cities')
-    print(x)
     api_handler.run_server()
 
 

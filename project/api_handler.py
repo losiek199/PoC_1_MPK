@@ -7,6 +7,7 @@ import project.db_controller as db
 app = Flask(__name__)
 api = Api(app)
 
+print(db.Base.mro())
 def run_server():
     app.run(debug=True)
 
@@ -16,7 +17,7 @@ def welcome():
 
 @app.route("/routes", methods=['GET'])
 def routes():
-    cities = db.select_from_table('cities')
+    cities = db.select_cities()
     return render_template('routes_main.html', cities=cities)
 
 @app.route("/routes/<city_name>", methods=['GET'])
@@ -30,7 +31,7 @@ def route(city_name):
 
 @app.route('/trips', methods=['GET'])
 def trips_city():
-    cities = db.select_from_table('cities')
+    cities = db.select_cities()
     return render_template('trips_city.html', cities=cities)
 
 @app.route('/trips/<city_name>', methods=['GET'])
@@ -53,7 +54,7 @@ def api_cities():
         else:
             return Response(status=200, response=request.data, mimetype='application/json')
     else:
-        data = db.select_from_table('cities')
+        data = db.select_cities()
         rdict = {'cities': [dict(val) for val in data]}
         return jsonify(rdict)
 
