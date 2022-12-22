@@ -3,8 +3,10 @@ import pytest
 import flask
 import sqlalchemy
 import os
+from project.models import  Cities, Cities_schema, City_trips, City_trips_schema, Routes, Routes_schema, Stops, Stop_times, Trips, Vehicle_types
 import project.db_controller as db
 import project.api_handler as ah
+
 
 
 @pytest.fixture(autouse=True)

@@ -19,10 +19,9 @@ def main():
     get_data.load_data_from_url(TEMP_URL_PLACEHOLDER, file_destination)
     # starting flask
     db.load_city_trips()
-    print('Loaded custom City_trips tablee')
+    print('Loaded custom City_trips table')
     # starting flask
     api_handler.run_server()
-
 
 if __name__ == '__main__':
     main()

@@ -8,7 +8,7 @@ app = Flask(__name__)
 api = Api(app)
 
 def run_server():
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)
 
 @app.route("/", methods=['GET'])
 def welcome():
