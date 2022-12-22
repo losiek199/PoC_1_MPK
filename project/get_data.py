@@ -65,8 +65,12 @@ def delete_file(file_path):
 def load_data_from_url(url, directory):
     """downloads data from given url and ordres truncate load to DB"""
     # download files
+    session = db.Session()
+    session.autocommit = True
     unpacked_dir = download_file(url, directory)
     # load data into DB nd delete file afterwards
     for file in os.listdir(unpacked_dir):
-        db.truncate_load_table(file.split('.')[0], os.path.join(unpacked_dir, file))
+        db.truncate_load_table(session, file.split('.')[0], os.path.join(unpacked_dir, file))
         delete_file(os.path.join(unpacked_dir, file))
+    print('Loaded all files')
+

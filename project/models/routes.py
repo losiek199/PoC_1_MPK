@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from db_controller import Base
+from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 
 class Routes(Base):
     __tablename__ = 'routes'
@@ -14,3 +15,10 @@ class Routes(Base):
     valid_from = Column(String(128))
     valid_until = Column(String(128))
     city_id = Column(Integer, ForeignKey('cities.city_id'))
+
+
+class Routes_schema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = Routes
+        include_relationships = True
+        load_instance = True

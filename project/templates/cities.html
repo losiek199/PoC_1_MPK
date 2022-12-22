@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cities</title>
+</head>
+<body>
+  <h1>Get file with trips for chosen city</h1>
+    <ol>
+        {%for city in cities%}
+            <li>City ID: {{city.city_id}}, city name: {{city.city_name}}</li>
+        {%endfor%}
+    </ol>
+    <p></p>
+    <button>
+        <a href="{{url_for('welcome')}}">Home</a>
+    </button>
+</body>
+</html>

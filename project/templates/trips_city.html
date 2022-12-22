@@ -18,19 +18,23 @@
     </script>
 </head>
 <body>
-  <h1>Get file with trips for chosen city</h1>
+  <h1>Get trips for chosen city</h1>
     <p>
         <select id="city" onchange="get_city()">
             <option value="none">Choose city</option>
             {%for city in cities%}
-                <option value="{{url_for('trips_city_file', city_name=city.city_name)}}">{{city.city_name}}</option>
+                <option value="{{url_for('trips_city_list', city_name=city.city_name, page=1)}}">{{city.city_name}}</option>
             {%endfor%}
         </select>
     </p>
-    <a id="next" href="{{url_for('trips_city_file', city_name='')}}" >
+    <a id="next" href="{{url_for('trips_city_list', city_name='')}}" >
         <button id="next_button" type="button" disabled="True">
             Get trips for chosen city
         </button>
     </a>
+    <p></p>
+    <button>
+        <a href="{{url_for('welcome')}}">Home</a>
+    </button>
 </body>
 </html>

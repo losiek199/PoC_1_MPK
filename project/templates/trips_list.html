@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Trips</title>
+</head>
+<body>
+    <h1>Trips for: {{city_name}}</h1>
+    <p>
+        {%for trip in trips%}
+          <li>Heading: {{trip.trip_headsign}}, stop name: {{trip.stop_name}}, arrival at: {{trip.arrival_time}}</li>
+        {%endfor%}
+    </p>
+    <a href="{{url_for('trips_city_list', city_name=city_name, page=page+1)}}">
+        <button >NEXT </button>
+    </a>
+    <br></br>
+    <a href="{{url_for('trips_city_list', city_name=city_name, page=page-1)}}">
+        <button >PREVIOUS </button>
+    </a>
+    <br></br>
+    <button>
+        <a href="{{url_for('welcome')}}">Home</a>
+    </button>
+<p>Number of pages: {{page_cnt}}</p>
+</body>
+</html>

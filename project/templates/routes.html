@@ -7,7 +7,9 @@
 <body>
     <h1>Routes for: {{city_name}}</h1>
     <p>
-        {{routes}}
+        {%for route in routes%}
+          <li>Route name: {{route.route_short_name}}</li>
+        {%endfor%}
     </p>
 </body>
 </html>

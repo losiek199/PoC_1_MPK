@@ -1,4 +1,4 @@
-import db_controller
+import db_controller as db
 import api_handler
 import os
 import get_data
@@ -12,13 +12,14 @@ file_destination = os.path.join(os.getcwd(), TEMP_SAVE_PATH, TEMP_DIR_NAME)
 
 def main():
     # make sure that directory exists and grant needed privelages
-    # download_path = os.path.join(os.getcwd(), TEMP_SAVE_PATH)
-    # if not os.path.exists(download_path):
-    #     get_data.create_dir(download_path)
+    download_path = os.path.join(os.getcwd(), TEMP_SAVE_PATH)
+    if not os.path.exists(download_path):
+        get_data.create_dir(download_path)
     # download zip from url and pass it to db
-    # get_data.load_data_from_url(TEMP_URL_PLACEHOLDER, file_destination)
-    # load city trips table
-    # db_controller.load_city_trips()
+    get_data.load_data_from_url(TEMP_URL_PLACEHOLDER, file_destination)
+    # starting flask
+    db.load_city_trips()
+    print('Loaded custom City_trips tablee')
     # starting flask
     api_handler.run_server()
 

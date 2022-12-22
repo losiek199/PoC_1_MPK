@@ -1,5 +1,6 @@
 from db_controller import Base
 from sqlalchemy import Column, Integer, Float, String
+from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 
 class City_trips(Base):
     __tablename__ = 'city_trips'
@@ -15,3 +16,8 @@ class City_trips(Base):
     vehicle_type_id = Column(Integer, primary_key=True)
 
 
+class City_trips_schema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = City_trips
+        include_relationships = True
+        load_instance = True
