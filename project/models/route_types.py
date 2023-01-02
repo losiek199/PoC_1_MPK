@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
-from db_controller import Base
+from . import Base
 
 class Route_types(Base):
     __tablename__ = 'route_types'

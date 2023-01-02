@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, ForeignKey
-from db_controller import Base
+from . import Base
 
 class Variants(Base):
     __tablename__ = 'variants'

@@ -1,8 +1,8 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
-from db_controller import Base
+from . import Base
 
 class Agency(Base):
-    __tablename__='agency'
+    __tablename__ = 'agency'
 
     agency_id = Column(Integer, primary_key=True)
     agency_name = Column(String)

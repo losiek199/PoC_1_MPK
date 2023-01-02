@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, Float, ForeignKey
-from db_controller import Base
+from . import Base
 
 class Shapes(Base):
     __tablename__ = 'shapes'

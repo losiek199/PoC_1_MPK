@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
-from db_controller import Base
+from . import Base
 
 class Feed_info(Base):
     __tablename__ = 'feed_info'

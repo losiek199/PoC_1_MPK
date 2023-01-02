@@ -1,13 +1,8 @@
 import tempfile
 import pytest
-import flask
-import sqlalchemy
 import os
-from project.models import  Cities, Cities_schema, City_trips, City_trips_schema, Routes, Routes_schema, Stops, Stop_times, Trips, Vehicle_types
 import project.db_controller as db
 import project.api_handler as ah
-
-
 
 @pytest.fixture(autouse=True)
 def client():
@@ -30,8 +25,7 @@ def cities_mocked_row():
 
 @pytest.fixture(autouse=True)
 def routes_mocked_row():
-    return {"count": 1,
-            "routes":[
+    return [
                 {"agency_id": 2,
                 "city_id": 1,
                 "route_desc": "KOZANÓW - Kozanowska - Popowicka - Kozanowska - KOZANÓW",
@@ -42,20 +36,17 @@ def routes_mocked_row():
                 "route_type2_id": 35,
                 "valid_from": "2022-11-26",
                 "valid_until": "2999-01-01"}
-                ]
-            }
+            ]
 
 @pytest.fixture(autouse=True)
 def trips_mocked_row():
-    return {"count": 1,
-            "trips":[
-                {'trip_id': '8_11600331',
-                 'trip_headsign': 'LEŚNICA',
-                 'route_id': '923',
-                 'arrival_time': '05:05:00',
-                 'stop_id': '4201',
-                 'stop_code': 18388,
-                 'stop_name': 'LEŚNICA',
-                 'vehicle_type_id': 1}
-                ]
-            }
+    return [{'city_id': '1',
+             'trip_id': '8_11600331',
+             'trip_headsign': 'LEŚNICA',
+             'route_id': '923',
+             'arrival_time': '05:05:00',
+             'stop_id': '4201',
+             'stop_code': 18388,
+             'stop_name': 'LEŚNICA',
+             'vehicle_type_id': 1}]
+

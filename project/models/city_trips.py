@@ -1,6 +1,7 @@
-from db_controller import Base
-from sqlalchemy import Column, Integer, Float, String
+from sqlalchemy import Column, Integer, String
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
+from . import Base
+
 
 class City_trips(Base):
     __tablename__ = 'city_trips'

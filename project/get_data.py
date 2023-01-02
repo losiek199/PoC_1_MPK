@@ -1,8 +1,6 @@
 import requests
 import os
 import zipfile
-import app
-import db_controller as db
 
 """
 module responsible for downloading data
@@ -25,7 +23,7 @@ def assign_dir_privelages(path, mode=0o777):
             print('Permission granted:', file)
 
 
-def download_file(file_url, save_path):
+def download_file(file_url, save_path, tmp_path):
     """downloads file from URL into target location"""
     req = requests.get(file_url, allow_redirects=True)
     #check status
@@ -36,15 +34,15 @@ def download_file(file_url, save_path):
             for chunk in req.iter_content():
                 file.write(chunk)
     #unpacking zipped file
-        return unzip_file(save_path)
+        return unzip_file(save_path, tmp_path)
     except PermissionError:
         assign_dir_privelages(save_path)
         download_file(file_url, save_path)
 
-def unzip_file(file_path):
+def unzip_file(file_path, tmp_path):
     """unpack file into temporary directory and remove source file afterwards, returns directory where files were unpacked"""
     #unpack destination
-    write_path = os.path.join(os.path.join(os.getcwd(), app.TEMP_SAVE_PATH, TEMP))
+    write_path = os.path.join(os.path.join(os.getcwd(), tmp_path, TEMP))
     #check dir existance and create if needed
     try:
         if not os.path.exists(write_path):
@@ -62,15 +60,9 @@ def delete_file(file_path):
     """deletes file at specified file_path"""
     os.remove(file_path)
 
-def load_data_from_url(url, directory):
+def load_data_from_url(url, directory, tmp_path):
     """downloads data from given url and ordres truncate load to DB"""
     # download files
-    session = db.Session()
-    session.autocommit = True
-    unpacked_dir = download_file(url, directory)
-    # load data into DB nd delete file afterwards
-    for file in os.listdir(unpacked_dir):
-        db.truncate_load_table(session, file.split('.')[0], os.path.join(unpacked_dir, file))
-        delete_file(os.path.join(unpacked_dir, file))
-    print('Loaded all files')
+    unpacked_dir = download_file(url, directory, tmp_path)
+    return unpacked_dir
 

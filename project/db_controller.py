@@ -1,46 +1,17 @@
-import sqlalchemy
-from sqlalchemy.exc import SQLAlchemyError
 import pandas
-import copy
-
 import sqlalchemy as db
+from sqlalchemy.exc import SQLAlchemyError
+
 eng = db.create_engine('sqlite:///mpk.db', echo=False)
 
-from sqlalchemy.orm import declarative_base, sessionmaker
-Base = declarative_base(bind=eng)
+from sqlalchemy.orm import sessionmaker
 Session = sessionmaker(bind=eng)
 
 #importing models after declarative Base object is created to not couse dependency errors
-from project.models import  Cities, Cities_schema, City_trips, City_trips_schema, Routes, Routes_schema, Stops, Stop_times, Trips, Vehicle_types
-
-#medatadata and inspector for created DB
-ins = db.inspect(eng)
-
-#creating DB tables and metadatada schema
+from project.models import Base, Cities, Cities_schema, City_trips, City_trips_schema, Routes, Routes_schema, Stops, Stop_times, Trips, Vehicle_types
+base_tables = {}
+Base.metadata.bind = eng
 Base.metadata.create_all()
-meta = Base.metadata
-tables_dict = {table_class.__tablename__: table_class for table_class in Base.__subclasses__()}
-base_tables_dict = copy.deepcopy(tables_dict)
-
-
-def db_engine_inspection():
-    """checks if tables exists in reflected db tables"""
-    if [tab_name for tab_name in meta.tables if tab_name not in ins.get_table_names()]:
-        print('Creating tables')
-        meta.create_all(eng, checkfirst=True)
-
-
-def initialize_connection(connection_string: str = 'sqlite:///mpk.db'):
-    """creating db connection and getting db metadata"""
-    try:
-        eng = db.create_engine(connection_string, echo=False)
-        conn = eng.connect()
-        meta.reflect(bind=eng)
-        return conn
-    except SQLAlchemyError as e:
-        print(f"Error while connecting to db")
-        raise e
-
 
 def insert_city_row(session, data):
     """insert single data row into cities table"""
@@ -68,7 +39,7 @@ def get_class_from_model(table_name):
     # extract table class from model
     for table_class in Base.__subclasses__():
         if hasattr(table_class, '__tablename__') and table_class.__tablename__ == table_name:
-            print(f'found match {table_name}, mathcing class {table_class}')
+            print(f'found match {table_name}, matching class {table_class}')
             table = table_class
     if table == None:
         print('didn''t found any match' )
@@ -80,14 +51,15 @@ def select_columns(model_class, columns):
     if len(columns) == 0:
         return None
     else:
-        columns_meta = [f'{model_class.__name__}.{col}' for col in columns]
+        print(columns)
+        columns_meta = [model_class for col in columns]
         return columns_meta
 
 def load_city_trips():
     """Function preloads city trips based on prepared query to speed up data handling between db and API"""
     session = Session()
     #clean current data
-    del_query = sqlalchemy.delete(City_trips)
+    del_query = db.delete(City_trips)
     session.execute(del_query)
 
     #Loading query
@@ -122,7 +94,7 @@ def load_city_trips():
                                      vehicle_type_id=obj['vehicle_type_id'])
                           )
     session.add_all(city_trips)
-    session.commit(),0
+    session.commit(), 0
 
 
 def truncate_load_table(session, table_name: str, source_path: str, city_name: str ='Wrocław'):
@@ -131,7 +103,7 @@ def truncate_load_table(session, table_name: str, source_path: str, city_name: s
     #search for valid table in metadata
     table = get_class_from_model(table_name)
     #truncate table
-    query = sqlalchemy.delete(table)
+    query = db.delete(table)
     session.execute(query)
 
     #validation of city existance
@@ -196,6 +168,7 @@ def select_cities(session):
     """returns cities extracted from DB Cities table"""
     cities_schema = Cities_schema(many=True)
     result = cities_schema.dump(session.query(Cities).all())
+    print(result)
     return result
 
 def select_count_from_table(session, table_name):

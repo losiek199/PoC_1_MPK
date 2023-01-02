@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String
-from db_controller import Base
+from . import Base
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 
 

@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
-from db_controller import Base
+from . import Base
 
 class Stop_times(Base):
     __tablename__ = 'stop_times'
