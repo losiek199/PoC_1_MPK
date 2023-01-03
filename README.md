@@ -12,14 +12,7 @@ Tasks:
 -By using Flask implement two REST endpoints that return in json format a list of cities and routes for a given city respectively.
 
 
+PoC 1.b: Trips Denormalization
 
-
-###
-TODO:
-1. Create project
-2. start project files
-3. write code to download data from endpoint: https://www.wroclaw.pl/open-data/dataset/rozkladjazdytransportupublicznegoplik_data
-4. create local database client (PostgresSQL)
-5. write proces to load data into db 
-5a. write pipeline to load data into db and prepare needed transformations
-6. Create REST Endpoints that returns all enpoints in JSON format list 
+Tasks:
+By using the data from the MPK and the files: trips, stops, stops_times_vehicle_types; create a new denormalized file, trips_denorm which the attributes indicated in the diagram. The new file shall contains the following columns: trip_id, route_id, trip_headsign, arrival_time, stop_id, stop_code, stop_name, vehicle_type_id.
