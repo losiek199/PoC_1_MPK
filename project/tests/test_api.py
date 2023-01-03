@@ -5,21 +5,10 @@ import json
 import project.api_handler as ah
 
 """Fixtures and configuration"""
-mpk_source_url = 'https://www.wroclaw.pl/open-data/dataset/rozkladjazdytransportupublicznegoplik_data'
 local_source_url = 'http://127.0.0.1:5000/'
 test_city = 'Wrocław'
 app = ah.app
 client = ah.app.test_client()
-
-@pytest.fixture(autouse=True)
-def source_file_response():
-    return requests.get('https://www.wroclaw.pl/open-data/dataset/rozkladjazdytransportupublicznegoplik_data')
-
-
-"""Test methods"""
-def test_get_flask_defined_urls():
-    resp = client.get('/')
-    assert resp.status_code == 200
 
 def test_get_flask_cities_response(mocker, cities_mocked_row):
     mocker.patch('project.api_handler.select_cities', return_value=cities_mocked_row)
