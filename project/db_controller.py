@@ -79,6 +79,7 @@ def load_city_trips():
                        Stops.stop_name,
                        Vehicle_types.vehicle_type_id) \
         .where(Trips.city_id == 1) \
+        .distinct() \
         .all()
 
     #creating list of objects to laod into City_trips table
@@ -95,7 +96,7 @@ def load_city_trips():
                                      vehicle_type_id=obj['vehicle_type_id'])
                           )
     session.add_all(city_trips)
-    session.commit(), 0
+    session.commit()
 
 
 def truncate_load_table(session, table_name: str, source_path: str, city_name: str ='Wrocław'):
