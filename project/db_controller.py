@@ -1,6 +1,7 @@
 import pandas
 import sqlalchemy as db
 from sqlalchemy.exc import SQLAlchemyError
+import os
 
 eng = db.create_engine('sqlite:///mpk.db', echo=False)
 
@@ -124,7 +125,7 @@ def truncate_load_table(session, table_name: str, source_path: str, city_name: s
     #deduplication of data
     df.drop_duplicates(inplace=True)
     #actual insert of data to DB
-    df.to_sql(table_name, con=eng, if_exists='append', index=False)
+    df.to_sql(table_name, con=eng, if_exists='replace', index=False)
 
 
 def select_from_table(session, table_name: str, columns_list: tuple = None):
